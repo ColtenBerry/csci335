@@ -74,28 +74,14 @@ public class QTable {
         double update_value = (1 - learning_rate) * q[lastState][getLastAction()] + learning_rate * (discount * q[newState][best_action] + (reward));
         q[getLastState()][getLastAction()] = update_value;
         visits[getLastState()][getLastAction()] += 1;
+        lastState = newState;
         if (isExploring(newState)) {
-            int low_visit = 0;
-            for (int i = 0; i < visits[newState].length; i++) {
-                if (visits[newState][i] < visits[newState][low_visit]) {
-                    low_visit = i;
-                }
-            }
-            lastState = newState;
-            lastAction = low_visit;
-            return low_visit;
+            lastAction = leastVisitedAction(newState);
         }
         else {
-            int highest = 0;
-            for (int i = 0; i < q[newState].length; i++) {
-                if (q[newState][i] > q[newState][highest]) {
-                    highest = i;
-                }
-            }
-            lastState = newState;
-            lastAction = highest;
-            return highest;
+            lastAction = getBestAction(newState);
         }
+        return lastAction;
     }
 
     public QTable(int states, int actions, int startState, int targetVisits, int rateConstant, double discount) {
