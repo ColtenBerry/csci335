@@ -10,3 +10,4 @@ public class BreadthFirst implements ToIntFunction<MazeExplorer> {
         return 0;
     }
 }
+//distance from x + distance from y

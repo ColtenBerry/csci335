@@ -3,31 +3,28 @@ import core.Pos;
 import maze.core.MazeExplorer;
 import java.util.function.ToIntFunction;
 import java.lang.Math;
-
-public class TreasureHunter implements ToIntFunction<MazeExplorer>{
+//non monotonic
+public class TreasureAdder implements ToIntFunction<MazeExplorer>{
 
     @Override
     public int applyAsInt(MazeExplorer value) {
-        int y_distance;
-        int x_distance;
+        int y_distance = 0;
+        int x_distance = 0;
         int result;
         for (Pos treasure: value.getAllTreasureFromMaze()) {
             for (Pos treasure_found: value.getAllTreasureFound()) {
                 if (treasure != treasure_found) {
-                    x_distance = Math.abs(value.getLocation().getX() - treasure.getX());
-                    y_distance = Math.abs(value.getLocation().getY() - treasure.getY());
+                    x_distance += Math.abs(value.getLocation().getX() - treasure.getX());
+                    y_distance += Math.abs(value.getLocation().getY() - treasure.getY());
                     result = x_distance + y_distance;
-                    System.out.println("not equal");
                     return result;
-                }
-                else {
-                    System.out.println("equal");
                 }
             }
         }
-        x_distance = Math.abs(value.getLocation().getX() - value.getGoal().getLocation().getX());
-        y_distance = Math.abs(value.getLocation().getY() - value.getGoal().getLocation().getY());
+        x_distance += Math.abs(value.getLocation().getX() - value.getGoal().getLocation().getX());
+        y_distance += Math.abs(value.getLocation().getY() - value.getGoal().getLocation().getY());
         result = x_distance + y_distance;
+        System.out.println(result);
         return result;
     }
     //monotonic

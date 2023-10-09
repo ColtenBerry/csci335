@@ -45,17 +45,10 @@ public class BestFirstQueue<T> implements SearchQueue<T> {
     @Override
     public void enqueue(SearchNode<T> node) {
         // TODO: Your code here
-        int result_int;
-        if (!visited.containsKey(node.getValue())) {
-            visited.put(node.getValue(), heuristic.applyAsInt(node.getValue()) + node.getDepth());
+        int result_int =  heuristic.applyAsInt(node.getValue()) + node.getDepth();
+        if (!visited.containsKey(node.getValue()) || visited.get(node.getValue()) > result_int) {
+            visited.put(node.getValue(), result_int);
             queue.add(node);
-        }
-        else {
-            result_int = queue.comparator().compare(node, node);
-            if (result_int > 0) {
-                queue.remove(visited.get(node));
-                queue.add(node);
-            }
         }
     }
 
