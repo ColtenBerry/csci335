@@ -13,7 +13,7 @@ public class TreasureAdder implements ToIntFunction<MazeExplorer>{
         int result;
         for (Pos treasure: value.getAllTreasureFromMaze()) {
             for (Pos treasure_found: value.getAllTreasureFound()) {
-                if (treasure != treasure_found) {
+                if (!treasure.equals(treasure_found)) {
                     x_distance += Math.abs(value.getLocation().getX() - treasure.getX());
                     y_distance += Math.abs(value.getLocation().getY() - treasure.getY());
                     result = x_distance + y_distance;

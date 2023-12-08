@@ -6,7 +6,6 @@ import java.util.function.ToDoubleBiFunction;
 
 public class SelfOrgMap<V> {
     private V[][] map;
-    private double[][] trainingCounts;
     private ToDoubleBiFunction<V, V> distance;
     private WeightedAverager<V> averager;
 
@@ -19,44 +18,52 @@ public class SelfOrgMap<V> {
                 map[i][j] = makeDefault.get();
             }
         }
-        trainingCounts = new double[side][side];
     }
 
     // TODO: Return a SOMPoint corresponding to the map square which has the
     //  smallest distance compared to example.
+    // NOTE: The unit tests assume that the map is traversed in row-major order,
+    //  that is, the y-coordinate is updated in the outer loop, and the x-coordinate
+    //  is updated in the inner loop.
     public SOMPoint bestFor(V example) {
-		// Your code here.
-        return null;
+        SOMPoint point = new SOMPoint(0, 0);
+        Double smallest_difference = 100000000.0;
+        for (int y = 0; y < map.length; y++) {
+            for (int x = 0; x < map[y].length; x++) {
+                double difference = distance.applyAsDouble(example, getNode(x, y));
+                if (difference < smallest_difference) {
+                    smallest_difference = difference;
+                    point = new SOMPoint(x, y);
+                }
+            }
+        }
+        return point;
     }
 
     // TODO: Train this SOM with example.
     //  1. Find the best matching node.
-    //  2. For every node in the map:
-    //     a. Find the distance weight to the best matching node. Call computeDistanceWeight().
-    //     b. Add the distance weight to its training count.
-    //     c. Find the effective learning rate. Call effectiveLearningRate().
-    //     d. Update the node with the average of itself and example, with example weighted by
-    //        the effective learning rate.
+    //  2. Update the best matching node with the average of itself and example,
+    //     using a learning rate of 0.9.
+    //  3. Update each neighbor of the best matching node that is in the map,
+    //     using a learning rate of 0.4.
     public void train(V example) {
         // Your code here
-    }
+        SOMPoint best_point = bestFor(example);
+//        System.out.println("Best Point: " + best_point);
+//        System.out.println("Best point node: " + getNode(best_point.x(), best_point.y()));
+        V average1 = averager.weightedAverage(example, getNode(best_point.x(), best_point.y()), 0.9);
+        map[best_point.x()][best_point.y()] = average1;
 
-    // TODO: Find the distance between the locations of sp1 and sp2 in the
-    //  self-organizing map. Next, scale the distance based on the map length,
-    //  so that it is a value between zero and one. Then, since big distances
-    //  should have small weights, subtract it from 1. Finally, make sure it
-    //  is not any smaller than zero.
-    public double computeDistanceWeight(SOMPoint sp1, SOMPoint sp2) {
-		// Your code here
-        return 0.0;
-    }
-
-    // TODO: First, find the update rate. This is the reciprocal of the training
-    //  count. But make sure it is no more than one, even if the training count is
-    //  tiny. Then, multiply it by the distance weight.
-    public static double effectiveLearningRate(double distWeight, double trainingCounts) {
-		// Your code here
-        return 0.0;
+//        System.out.println("Best point average: " + average1);
+        SOMPoint[] neighbors = best_point.neighbors();
+        for (SOMPoint point: neighbors) {
+            if (inMap(point)) {
+                V average = averager.weightedAverage(example, getNode(point.x(), point.y()), 0.4);
+                map[point.x()][point.y()] = average;
+//                System.out.println("Neighbor point: " + point);
+//                System.out.println("Neighbor average: " + average);
+            }
+        }
     }
 
     public V getNode(int x, int y) {
@@ -69,6 +76,10 @@ public class SelfOrgMap<V> {
 
     public int getMapHeight() {
         return map[0].length;
+    }
+
+    public int numMapNodes() {
+        return getMapHeight() * getMapWidth();
     }
 
     public boolean inMap(SOMPoint point) {
